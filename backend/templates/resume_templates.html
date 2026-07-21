@@ -1,0 +1,231 @@
+{# app/templates/resume_template.html #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ full_name }} — Resume</title>
+<style>
+  @page { size: Letter; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    color: #1A1A1A;
+    background: #fff;
+  }
+  .resume-paper {
+    width: 100%;
+    padding: 0.5in 0.65in;
+  }
+
+  .r-name { text-align: center; font-size: 1.9rem; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 4px; }
+  .r-contact { text-align: center; font-size: 0.76rem; color: #1A1A1A; margin-bottom: 14px; letter-spacing: 0.01em; }
+  .r-contact a { color: #1A1A1A; text-decoration: none; }
+  .r-contact .sep { margin: 0 5px; color: #aaa; }
+  .r-icon { vertical-align: -1px; margin-right: 3px; }
+  .r-summary { font-size: 0.86rem; line-height: 1.55; margin-bottom: 10px; color: #222; }
+
+  .r-section { margin-top: 14px; }
+  .r-section h3 {
+    font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 1px solid #1A1A1A; padding-bottom: 2px; margin: 0 0 8px; font-weight: 700;
+  }
+  .r-entry { margin-bottom: 9px; page-break-inside: avoid; }
+  .r-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.88rem; gap: 10px; }
+  .r-row strong { font-weight: 700; }
+  .r-row .r-italic { font-style: italic; font-size: 0.84rem; color: #222; }
+  .r-row.sub { margin-top: 1px; }
+  .r-bullets { margin: 4px 0 0 18px; padding: 0; font-size: 0.85rem; line-height: 1.45; }
+  .r-bullets li { margin-bottom: 2px; }
+  .r-skill-line { font-size: 0.86rem; margin-bottom: 3px; }
+  .r-skill-line strong { font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="resume-paper">
+
+  <div class="r-name">{{ full_name or "Your Name" }}</div>
+
+  {% set contact_parts = [] %}
+  {% if location %}{% set _ = contact_parts.append(location) %}{% endif %}
+  {% if phone %}{% set _ = contact_parts.append('phone') %}{% endif %}
+  {% if email %}{% set _ = contact_parts.append('email') %}{% endif %}
+  {% if linkedin %}{% set _ = contact_parts.append('linkedin') %}{% endif %}
+  {% if github %}{% set _ = contact_parts.append('github') %}{% endif %}
+  {% if portfolio %}{% set _ = contact_parts.append('portfolio') %}{% endif %}
+
+  {% if contact_parts %}
+  <div class="r-contact">
+    {% set printed = [] %}
+    {% if location %}
+      {% if printed %}<span class="sep">|</span>{% endif %}{{ location }}
+      {% set _ = printed.append(1) %}
+    {% endif %}
+    {% if phone %}
+      {% if printed %}<span class="sep">|</span>{% endif %}<a href="tel:{{ phone|replace(' ', '')|replace('-', '')|replace('(', '')|replace(')', '') }}">{{ phone }}</a>
+      {% set _ = printed.append(1) %}
+    {% endif %}
+    {% if email %}
+      {% if printed %}<span class="sep">|</span>{% endif %}<a href="mailto:{{ email }}">{{ email }}</a>
+      {% set _ = printed.append(1) %}
+    {% endif %}
+    {% if linkedin %}
+      {% if printed %}<span class="sep">|</span>{% endif %}<a href="{{ as_href(linkedin) }}">{{ clean_link(linkedin) }}</a>
+      {% set _ = printed.append(1) %}
+    {% endif %}
+    {% if github %}
+      {% if printed %}<span class="sep">|</span>{% endif %}<a href="{{ as_href(github) }}">{{ clean_link(github) }}</a>
+      {% set _ = printed.append(1) %}
+    {% endif %}
+    {% if portfolio %}
+      {% if printed %}<span class="sep">|</span>{% endif %}<a href="{{ as_href(portfolio) }}">{{ clean_link(portfolio) }}</a>
+      {% set _ = printed.append(1) %}
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if summary %}<div class="r-summary">{{ summary }}</div>{% endif %}
+
+  {% if education %}
+  <div class="r-section">
+    <h3>Education</h3>
+    {% for edu in education %}
+      {% if edu.school or edu.degree %}
+      <div class="r-entry">
+        <div class="r-row"><strong>{{ edu.school or '' }}</strong><span>{{ edu.location or '' }}</span></div>
+        <div class="r-row sub">
+          <span class="r-italic">{{ edu.degree or '' }}{% if edu.gpa %}  ·  GPA: {{ edu.gpa }}{% endif %}</span>
+          <span class="r-italic">{{ [edu.start, edu.end] | select | join(' – ') }}</span>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if experience %}
+  <div class="r-section">
+    <h3>Experience</h3>
+    {% for exp in experience %}
+      {% if exp.title or exp.company %}
+      <div class="r-entry">
+        <div class="r-row"><strong>{{ exp.title or '' }}</strong><span>{{ exp.dates or '' }}</span></div>
+        <div class="r-row sub"><span class="r-italic">{{ exp.company or '' }}</span><span class="r-italic">{{ exp.location or '' }}</span></div>
+        {% if exp.bullets %}
+        <ul class="r-bullets">
+          {% for line in exp.bullets %}<li>{{ line }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if projects %}
+  <div class="r-section">
+    <h3>Projects</h3>
+    {% for proj in projects %}
+      {% if proj.name %}
+      <div class="r-entry">
+        <div class="r-row">
+          <span><strong>{{ proj.name }}</strong>{% if proj.stack %} <span class="r-italic">| {{ proj.stack }}</span>{% endif %}</span>
+          <span>{{ proj.date or '' }}</span>
+        </div>
+        {% if proj.link or proj.live %}
+        <div class="r-row sub">
+          <span class="r-italic">
+            {% if proj.link %}<strong>GitHub:</strong> <a href="{{ as_href(proj.link) }}">{{ clean_link(proj.link) }}</a>{% endif %}
+            {% if proj.link and proj.live %} <span class="sep">|</span> {% endif %}
+            {% if proj.live %}<a href="{{ as_href(proj.live) }}">Live</a>{% endif %}
+          </span>
+          <span></span>
+        </div>
+        {% endif %}
+        {% if proj.bullets %}
+        <ul class="r-bullets">
+          {% for line in proj.bullets %}<li>{{ line }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if skills %}
+  <div class="r-section">
+    <h3>Technical Skills</h3>
+    {% for skill in skills %}
+      {% if skill.category and skill.list %}
+      <div class="r-skill-line"><strong>{{ skill.category }}:</strong> {{ skill.list }}</div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if leadership %}
+  <div class="r-section">
+    <h3>Leadership / Position of Responsibility</h3>
+    {% for lead in leadership %}
+      {% if lead.role or lead.org %}
+      <div class="r-entry">
+        <div class="r-row"><strong>{{ lead.role or '' }}</strong><span>{{ lead.dates or '' }}</span></div>
+        <div class="r-row sub"><span class="r-italic">{{ lead.org or '' }}</span><span></span></div>
+        {% if lead.bullets %}
+        <ul class="r-bullets">
+          {% for line in lead.bullets %}<li>{{ line }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if coding_profiles %}
+  <div class="r-section">
+    <h3>Coding Profiles</h3>
+    {% for cp in coding_profiles %}
+      {% if cp.platform %}
+      <div class="r-skill-line">
+        <strong>{% if cp.link %}<a href="{{ as_href(cp.link) }}">{{ cp.platform }}</a>{% else %}{{ cp.platform }}{% endif %}</strong>{% if cp.stat %} — {{ cp.stat }}{% endif %}
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if certifications or achievements %}
+  <div class="r-section">
+    <h3>Certifications &amp; Achievements</h3>
+    <ul class="r-bullets">
+      {% for line in certifications %}<li>{{ line }}</li>{% endfor %}
+      {% for line in achievements %}<li>{{ line }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if interests %}
+  <div class="r-section">
+    <h3>Interests</h3>
+    <div class="r-skill-line">{{ interests }}</div>
+  </div>
+  {% endif %}
+
+  {% for custom in custom_sections %}
+    {% if custom.heading %}
+    <div class="r-section">
+      <h3>{{ custom.heading }}</h3>
+      {% if custom.content %}
+      <ul class="r-bullets">
+        {% for line in custom.content %}<li>{{ line }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% endif %}
+  {% endfor %}
+
+</div>
+</body>
+</html>

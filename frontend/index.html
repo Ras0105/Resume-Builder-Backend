@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Builder — Build your ATS-ready resume</title>
+<link rel="stylesheet" href="style.css">
+<!-- Backend API base URL — point this at your deployed FastAPI service -->
+<script>
+  window.RESUME_API_BASE = "https://your-fastapi-app.onrender.com"; // TODO: replace with real backend URL
+</script>
+<!-- Razorpay's checkout widget — required for the payment step -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark"><span>R</span></div>
+      Resume<span style="color:var(--copper)">Draft</span>
+      <small>Tech &amp; Engineering Resumes</small>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="resetBtn" type="button">Start over</button>
+      <button class="btn btn-primary" id="downloadTop" type="button">Download PDF</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- BUILDER PANEL -->
+    <aside class="builder-panel">
+      <nav class="steps-nav" id="stepsNav"></nav>
+
+      <form id="resumeForm" novalidate>
+
+        <!-- STEP 1: CONTACT -->
+        <section class="step active" data-step="0">
+          <div class="step-head">
+            <h2>Contact details</h2>
+            <p>This goes at the top of the resume. Name and email are the only must-haves — add the rest if you have it. Your email is also where we'll send your finished PDF after payment.</p>
+          </div>
+            <div class="field"><label for="fullName">Full name</label><input type="text" id="fullName" class="f-fullName" placeholder="Jordan Patel"></div>
+            <div class="field"><label for="email">Email</label><input type="email" id="email" class="f-email" placeholder="jordan.patel@email.com" required></div>
+            <div class="field"><label for="phone">Phone</label><input type="tel" id="phone" class="f-phone" placeholder="(555) 123-4567"></div>
+            <div class="field"><label for="location">Location (city, state)</label><input type="text" id="location" class="f-location" placeholder="Austin, TX"></div>
+            <div class="field"><label for="linkedin">LinkedIn URL</label><input type="text" id="linkedin" class="f-linkedin" placeholder="linkedin.com/in/jordanpatel"></div>
+            <div class="field"><label for="github">GitHub URL</label><input type="text" id="github" class="f-github" placeholder="github.com/jordanpatel"></div>
+            <div class="field"><label for="portfolio">Portfolio / website (optional)</label><input type="text" id="portfolio" class="f-portfolio" placeholder="jordanpatel.dev"></div>
+        </section>
+
+        <!-- STEP 2: SUMMARY -->
+        <section class="step" data-step="1">
+          <div class="step-head">
+            <h2>Summary</h2>
+            <p>Optional. Two or three sentences on who you are and what you're looking for. Most tech resumes skip this and let experience speak — leave it blank if you'd rather.</p>
+          </div>
+          <div class="field"><label for="summary">Professional summary</label><textarea id="summary" class="f-summary" placeholder="..."></textarea></div>
+        </section>
+
+        <!-- STEP 3: EDUCATION -->
+        <section class="step" data-step="2">
+          <div class="step-head">
+            <h2>Education</h2>
+            <p>Most recent first. Include GPA only if it strengthens your application.</p>
+          </div>
+          <div class="edu-rows">
+            <div class="entry-card edu-row">
+              <div class="field-row">
+                <div class="field"><label>School</label><input type="text" class="edu-school" placeholder="University of Texas at Austin"></div>
+                <div class="field"><label>Location</label><input type="text" class="edu-location" placeholder="Austin, TX"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Degree &amp; major</label><input type="text" class="edu-degree" placeholder="B.S. in Computer Science"></div>
+                <div class="field"><label>GPA (optional)</label><input type="text" class="edu-gpa" placeholder="3.8 / 4.0"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Start date</label><input type="text" class="edu-start" placeholder="Aug 2021"></div>
+                <div class="field"><label>End date</label><input type="text" class="edu-end" placeholder="May 2025"></div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="add-row" data-add="edu">+ Add another school</button>
+        </section>
+
+        <!-- STEP 4: EXPERIENCE -->
+        <section class="step" data-step="3">
+          <div class="step-head">
+            <h2>Work experience</h2>
+            <p>Internships count. Start each bullet with an action verb and a result where you can — numbers help.</p>
+          </div>
+          <div class="exp-rows">
+            <div class="entry-card exp-row">
+              <div class="field-row">
+                <div class="field"><label>Job title</label><input type="text" class="exp-title" placeholder="Software Engineering Intern"></div>
+                <div class="field"><label>Company</label><input type="text" class="exp-company" placeholder="Acme Robotics"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Location</label><input type="text" class="exp-location" placeholder="Remote"></div>
+                <div class="field"><label>Dates</label><input type="text" class="exp-dates" placeholder="Jun 2025 – Aug 2025"></div>
+              </div>
+              <div class="field"><label>What did you do? (one line per bullet)</label>
+                <textarea class="exp-bullets" placeholder="Built a REST API used by 12 internal teams, cutting report generation time by 40%
+Migrated legacy job queue to Celery, reducing failed-task rate from 6% to 0.5%"></textarea>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="add-row" data-add="exp">+ Add another role</button>
+        </section>
+
+        <!-- STEP 5: PROJECTS -->
+        <section class="step" data-step="4">
+          <div class="step-head">
+            <h2>Projects</h2>
+            <p>Especially useful if you're a student or early in your career. Link to GitHub or a live demo if you have one.</p>
+          </div>
+          <div class="proj-rows">
+            <div class="entry-card proj-row">
+              <div class="field-row">
+                <div class="field"><label>Project name</label><input type="text" class="proj-name" placeholder="TrailSync"></div>
+                <div class="field"><label>Tech stack</label><input type="text" class="proj-stack" placeholder="React, Node.js, PostgreSQL"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Date (optional)</label><input type="text" class="proj-date" placeholder="Spring 2025"></div>
+                <div class="field"><label>GitHub / repo link (optional)</label><input type="text" class="proj-link" placeholder="github.com/jordanpatel/trailsync"></div>
+              </div>
+              <div class="field"><label>Live link (optional)</label><input type="text" class="proj-live" placeholder="trailsync.vercel.app"></div>
+              <div class="field"><label>What did you build? (one line per bullet)</label>
+                <textarea class="proj-bullets" placeholder="Built a hiking-trail planner used by 200+ beta users
+Implemented offline map caching, reducing data usage by 70% on mobile"></textarea>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="add-row" data-add="proj">+ Add another project</button>
+        </section>
+
+        <!-- STEP 6: SKILLS -->
+        <section class="step" data-step="5">
+          <div class="step-head">
+            <h2>Technical skills</h2>
+            <p>Group skills into categories. This is the section ATS scanners read closest — be specific and accurate.</p>
+          </div>
+          <div class="skill-rows">
+            <div class="entry-card skill-row">
+              <div class="field"><label>Category</label><input type="text" class="skill-category" placeholder="Languages"></div>
+              <div class="field"><label>Skills (comma-separated)</label><input type="text" class="skill-list" placeholder="Python, JavaScript, Java, SQL"></div>
+            </div>
+            <div class="entry-card skill-row">
+              <div class="field"><label>Category</label><input type="text" class="skill-category" placeholder="Frameworks &amp; Libraries"></div>
+              <div class="field"><label>Skills (comma-separated)</label><input type="text" class="skill-list" placeholder="React, Django, Node.js, Pandas"></div>
+            </div>
+            <div class="entry-card skill-row">
+              <div class="field"><label>Category</label><input type="text" class="skill-category" placeholder="Tools &amp; Platforms"></div>
+              <div class="field"><label>Skills (comma-separated)</label><input type="text" class="skill-list" placeholder="Git, Docker, AWS, Linux"></div>
+            </div>
+          </div>
+          <button type="button" class="add-row" data-add="skill">+ Add another category</button>
+        </section>
+
+        <!-- STEP 7: OPTIONAL SECTIONS -->
+        <section class="step" data-step="6">
+          <div class="step-head">
+            <h2>Optional sections</h2>
+            <p>Everything here is optional — leave anything blank and it just won't appear on your resume.</p>
+          </div>
+
+          <h4 class="sub-block-head">Leadership / Position of responsibility</h4>
+          <div class="leadership-rows">
+            <div class="entry-card leadership-row">
+              <div class="field-row">
+                <div class="field"><label>Role / position</label><input type="text" class="lead-role" placeholder="Joint Secretary, Coding Club"></div>
+                <div class="field"><label>Organization</label><input type="text" class="lead-org" placeholder="Your college / club"></div>
+              </div>
+              <div class="field"><label>Dates</label><input type="text" class="lead-dates" placeholder="Aug 2023 – Jul 2024"></div>
+              <div class="field"><label>What did you do? (one line per bullet)</label>
+                <textarea class="lead-bullets" placeholder="Organized a 36-hour hackathon with 400+ participants
+Mentored 20 first-year students on DSA fundamentals"></textarea>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="add-row" data-add="leadership">+ Add another role</button>
+
+          <h4 class="sub-block-head">Coding profiles</h4>
+          <div class="coding-rows">
+            <div class="entry-card coding-row">
+              <div class="field-row">
+                <div class="field"><label>Platform</label><input type="text" class="coding-platform" placeholder="LeetCode"></div>
+                <div class="field"><label>Profile link</label><input type="text" class="coding-link" placeholder="leetcode.com/yourhandle"></div>
+              </div>
+              <div class="field"><label>Stat (optional)</label><input type="text" class="coding-stat" placeholder="500+ problems solved, Knight badge"></div>
+            </div>
+          </div>
+          <button type="button" class="add-row" data-add="coding">+ Add another profile</button>
+
+          <h4 class="sub-block-head">Interests</h4>
+          <div class="field"><label for="interests">Interests (comma-separated)</label><input type="text" id="interests" class="f-interests" placeholder="Chess, Photography, Open-source contributions"></div>
+
+          <h4 class="sub-block-head">Certifications &amp; achievements</h4>
+          <div class="field"><label for="certifications">Certifications</label><textarea id="certifications" class="f-certifications" placeholder="AWS Certified Cloud Practitioner, 2025"></textarea></div>
+          <div class="field"><label for="achievements">Achievements &amp; awards</label><textarea id="achievements" class="f-achievements" placeholder="1st place, HackTX 2024 (300+ participants)"></textarea></div>
+
+          <h4 class="sub-block-head">Custom section</h4>
+          <p class="field-hint" style="margin-top:-6px;margin-bottom:14px;">Add your own heading and content — whichever section you need.</p>
+          <div class="custom-rows"></div>
+          <button type="button" class="add-row" data-add="custom">+ Add a custom section</button>
+        </section>
+
+        <!-- STEP 8: REVIEW -->
+        <section class="step" data-step="7">
+          <div class="step-head">
+            <h2>Review &amp; download</h2>
+            <p>Your resume is on the right, updating as you type. When it looks right, pay to unlock your PDF — it'll be emailed to you and available to download here.</p>
+          </div>
+          <div class="review-box">
+            <h3>Before you download</h3>
+            <p>For tech &amp; engineering roles, aim for one page if you have under ~5 years of experience. Check that dates are consistent and bullets lead with what you did and what changed because of it.</p>
+          </div>
+          <button class="btn btn-primary" id="downloadBottom" type="button" style="width:100%;padding:14px;font-size:0.92rem;">Pay &amp; download PDF</button>
+        </section>
+
+        <div class="nav-buttons">
+          <button type="button" class="btn btn-ghost" id="prevBtn">Back</button>
+          <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+        </div>
+      </form>
+    </aside>
+
+    <!-- PREVIEW PANE -->
+    <main class="preview-pane">
+      <div id="previewMount"></div>
+    </main>
+  </div>
+</div>
+
+<!-- Payment / processing overlay — shown while checkout is open or a paid
+     order is waiting on PDF generation. Hidden by default; script.js toggles it. -->
+<div id="paymentOverlay" class="payment-overlay" hidden>
+  <div class="payment-box">
+    <p id="paymentStatusText">Preparing your order…</p>
+  </div>
+</div>
+
+<!-- Templates for repeatable rows -->
+<template id="tpl-edu">
+  <div class="entry-card edu-row">
+    <button type="button" class="remove-row" data-remove="edu">Remove</button>
+    <div class="field-row">
+      <div class="field"><label>School</label><input type="text" class="edu-school" placeholder="University name"></div>
+      <div class="field"><label>Location</label><input type="text" class="edu-location" placeholder="City, State"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Degree &amp; major</label><input type="text" class="edu-degree" placeholder="B.S. in Computer Science"></div>
+      <div class="field"><label>GPA (optional)</label><input type="text" class="edu-gpa" placeholder="3.8 / 4.0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Start date</label><input type="text" class="edu-start" placeholder="Aug 2021"></div>
+      <div class="field"><label>End date</label><input type="text" class="edu-end" placeholder="May 2025"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-exp">
+  <div class="entry-card exp-row">
+    <button type="button" class="remove-row" data-remove="exp">Remove</button>
+    <div class="field-row">
+      <div class="field"><label>Job title</label><input type="text" class="exp-title" placeholder="Job title"></div>
+      <div class="field"><label>Company</label><input type="text" class="exp-company" placeholder="Company name"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Location</label><input type="text" class="exp-location" placeholder="City, State or Remote"></div>
+      <div class="field"><label>Dates</label><input type="text" class="exp-dates" placeholder="Jun 2025 – Aug 2025"></div>
+    </div>
+    <div class="field"><label>What did you do? (one line per bullet)</label><textarea class="exp-bullets" placeholder="Led a project that improved..."></textarea></div>
+  </div>
+</template>
+
+<template id="tpl-proj">
+  <div class="entry-card proj-row">
+    <button type="button" class="remove-row" data-remove="proj">Remove</button>
+    <div class="field-row">
+      <div class="field"><label>Project name</label><input type="text" class="proj-name" placeholder="Project name"></div>
+      <div class="field"><label>Tech stack</label><input type="text" class="proj-stack" placeholder="React, Node.js"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Date (optional)</label><input type="text" class="proj-date" placeholder="Spring 2025"></div>
+      <div class="field"><label>GitHub / repo link (optional)</label><input type="text" class="proj-link" placeholder="github.com/..."></div>
+    </div>
+    <div class="field"><label>Live link (optional)</label><input type="text" class="proj-live" placeholder="your-demo-site.vercel.app"></div>
+    <div class="field"><label>What did you build? (one line per bullet)</label><textarea class="proj-bullets" placeholder="Built a..."></textarea></div>
+  </div>
+</template>
+
+<template id="tpl-skill">
+  <div class="entry-card skill-row">
+    <button type="button" class="remove-row" data-remove="skill">Remove</button>
+    <div class="field"><label>Category</label><input type="text" class="skill-category" placeholder="e.g. Cloud &amp; DevOps"></div>
+    <div class="field"><label>Skills (comma-separated)</label><input type="text" class="skill-list" placeholder="Docker, Kubernetes, AWS"></div>
+  </div>
+</template>
+
+<template id="tpl-leadership">
+  <div class="entry-card leadership-row">
+    <button type="button" class="remove-row" data-remove="leadership">Remove</button>
+    <div class="field-row">
+      <div class="field"><label>Role / position</label><input type="text" class="lead-role" placeholder="Role / position"></div>
+      <div class="field"><label>Organization</label><input type="text" class="lead-org" placeholder="Organization"></div>
+    </div>
+    <div class="field"><label>Dates</label><input type="text" class="lead-dates" placeholder="Aug 2023 – Jul 2024"></div>
+    <div class="field"><label>What did you do? (one line per bullet)</label><textarea class="lead-bullets" placeholder="Organized..."></textarea></div>
+  </div>
+</template>
+
+<template id="tpl-coding">
+  <div class="entry-card coding-row">
+    <button type="button" class="remove-row" data-remove="coding">Remove</button>
+    <div class="field-row">
+      <div class="field"><label>Platform</label><input type="text" class="coding-platform" placeholder="e.g. Codeforces"></div>
+      <div class="field"><label>Profile link</label><input type="text" class="coding-link" placeholder="codeforces.com/profile/..."></div>
+    </div>
+    <div class="field"><label>Stat (optional)</label><input type="text" class="coding-stat" placeholder="Rating, rank, or problems solved"></div>
+  </div>
+</template>
+
+<template id="tpl-custom">
+  <div class="entry-card custom-row">
+    <button type="button" class="remove-row" data-remove="custom">Remove</button>
+    <div class="field"><label>Section heading</label><input type="text" class="custom-heading" placeholder="e.g. Publications, Volunteering, Hobbies"></div>
+    <div class="field"><label>Content (one line per bullet)</label><textarea class="custom-content" placeholder="Write whatever you'd like here..."></textarea></div>
+  </div>
+</template>
+<script src="script.js"></script>
+</body>
+</html>
