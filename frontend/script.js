@@ -9,7 +9,7 @@
 
   // Configure this to match whatever you charge — kept in paise (smallest
   // unit) to match what the backend expects. Adjust to your real price.
-  const AMOUNT_PAISE = 4900; // ₹49
+  const AMOUNT_PAISE = 100; // ₹49
   const CURRENCY = 'INR';
 
   const API_BASE = window.RESUME_API_BASE || '';
@@ -509,3 +509,5 @@
   renderPreview();
   goToStep(0);
 })();
+
+100
