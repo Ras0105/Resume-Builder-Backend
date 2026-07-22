@@ -1,0 +1,29 @@
+# backend/requirements.txt
+
+# ---- Web framework ----
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# ---- Settings / validation ----
+pydantic==2.10.4
+pydantic-settings==2.7.1
+email-validator==2.2.0        # required by Pydantic's EmailStr
+
+# ---- Database ----
+sqlalchemy==2.0.36
+psycopg[binary]==3.2.3        # Postgres driver (matches DATABASE_URL's postgresql+psycopg:// scheme)
+
+# ---- Templating (server-side resume HTML -> PDF source) ----
+jinja2==3.1.5
+
+# ---- PDF generation ----
+playwright==1.49.1
+
+# ---- Payments ----
+razorpay==1.4.2
+
+# ---- Object storage (Supabase Storage / Cloudflare R2, both S3-compatible) ----
+boto3==1.35.90
+
+# ---- Email delivery ----
+resend==2.5.1
