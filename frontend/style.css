@@ -190,7 +190,7 @@
     position:absolute;
     inset:0;
     pointer-events:none;
-    background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='220'%3E%3Ctext x='0' y='120' font-family='Inter,sans-serif' font-weight='700' font-size='30' letter-spacing='2' fill='rgba(199,110,55,0.16)' transform='rotate(-32 210 110)'%3EPREVIEW · PAY TO DOWNLOAD%3C/text%3E%3C/svg%3E");
+    background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='220'%3E%3Ctext x='0' y='120' font-family='Inter,sans-serif' font-weight='700' font-size='30' letter-spacing='2' fill='rgba(199,110,55,0.16)' transform='rotate(-32 210 110)'%3Eresume-builder%3C/text%3E%3C/svg%3E");
     background-repeat:repeat;
   }
   .empty-state{
