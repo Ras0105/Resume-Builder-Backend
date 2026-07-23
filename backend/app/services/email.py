@@ -1,10 +1,11 @@
 # app/services/email.py
-import resend
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 from app.config import get_settings
 
 settings = get_settings()
-resend.api_key = settings.EMAIL_API_KEY
 
 
 class EmailDeliveryError(Exception):
@@ -19,9 +20,9 @@ def send_resume_ready_email(
     expires_in_minutes: int,
 ) -> None:
     """
-    Sends the finished resume PDF link to the customer. Called only after
-    payment is confirmed and the PDF has been generated and uploaded —
-    never call this speculatively or before generation succeeds.
+    Sends the finished resume PDF link to the customer via Gmail SMTP.
+    Called only after payment is confirmed and the PDF has been generated
+    and uploaded — never call this speculatively or before generation succeeds.
     """
     subject = "Your resume is ready to download"
 
@@ -53,16 +54,16 @@ def send_resume_ready_email(
         f"If it's expired, reply to this email and we'll send a fresh one."
     )
 
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = settings.EMAIL_FROM_ADDRESS
+    msg["To"] = to_email
+    msg.attach(MIMEText(text_body, "plain"))
+    msg.attach(MIMEText(html_body, "html"))
+
     try:
-        resend.Emails.send({
-            "from": settings.EMAIL_FROM_ADDRESS,
-            "to": to_email,
-            "subject": subject,
-            "html": html_body,
-            "text": text_body,
-        })
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(settings.EMAIL_FROM_ADDRESS, settings.EMAIL_APP_PASSWORD)
+            server.send_message(msg)
     except Exception as exc:
-        # Don't swallow this silently — the caller (pdf_pipeline) needs to
-        # know delivery failed so it can retry or flag the order for
-        # manual follow-up. A paid customer with no email is a support ticket.
         raise EmailDeliveryError(f"Failed to send resume email to {to_email}") from exc
