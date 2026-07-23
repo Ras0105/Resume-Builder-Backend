@@ -220,7 +220,7 @@
     pointer-events:none;
     user-select:none;
     z-index:5;
-  }
+  } 
 
   .r-name{text-align:center;font-size:1.9rem;font-weight:700;letter-spacing:0.02em;margin-bottom:4px;}
   .r-contact{text-align:center;font-size:0.76rem;color:#1A1A1A;margin-bottom:14px;letter-spacing:0.01em;}
