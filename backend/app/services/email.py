@@ -28,6 +28,16 @@ def send_resume_ready_email(
     (Railway included, on Free/Trial/Hobby plans) block outbound SMTP
     ports (25/465/587) entirely, which an HTTPS API call never hits.
     """
+    expires_in_hours = round(expires_in_minutes / 60, 1)
+    expires_in_days = round(expires_in_minutes / (60 * 24), 1)
+
+    if expires_in_minutes < 60:
+        expiry_text = f"{expires_in_minutes} minutes"
+    elif expires_in_minutes < 1440:
+        expiry_text = f"{expires_in_hours} hours"
+    else:
+        expiry_text = f"{expires_in_days} days"
+  
     subject = "Your resume is ready to download"
 
     html_body = f"""
@@ -45,7 +55,7 @@ def send_resume_ready_email(
         </a>
       </p>
       <p style="font-size: 12px; color: #666;">
-        This link expires in {expires_in_minutes} minutes and can only be used a limited number of times.
+        This link expires in {expiry_text} and can only be used a limited number of times.
         If it's expired, reply to this email and we'll send a fresh one.
       </p>
     </div>
@@ -54,7 +64,7 @@ def send_resume_ready_email(
     text_body = (
         f"Hi {customer_name or 'there'},\n\n"
         f"Your resume PDF is ready: {download_url}\n\n"
-        f"This link expires in {expires_in_minutes} minutes.\n"
+        f"This link expires in {expiry_text}.\n"
         f"If it's expired, reply to this email and we'll send a fresh one."
     )
 
