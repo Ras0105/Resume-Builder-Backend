@@ -35,6 +35,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
+# Tell Playwright to install its browsers inside /app instead of the default
+# /root/.cache — the app later runs as a non-root user (appuser), which has
+# no access to /root. Installing here means the chown of /app below covers
+# the browser binaries too.
+# ---------------------------------------------------------------------------
+ENV PLAYWRIGHT_BROWSERS_PATH=/app/.cache/ms-playwright
+
+# ---------------------------------------------------------------------------
 # Install Python deps first — separate layer so `pip install` is cached
 # unless requirements.txt actually changes, keeping rebuilds fast.
 # ---------------------------------------------------------------------------
