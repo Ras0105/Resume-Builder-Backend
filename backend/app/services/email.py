@@ -35,6 +35,8 @@ def send_resume_ready_email(
         expiry_text = f"{expires_in_minutes} minutes"
     elif expires_in_minutes < 1440:
         expiry_text = f"{expires_in_hours} hours"
+    elif expires_in_days==1:
+        expiry_text = f"{expires_in_days} day"
     else:
         expiry_text = f"{expires_in_days} days"
   
