@@ -383,7 +383,7 @@
   }
 
   // ---- Poll order status until it's COMPLETED or FAILED ----
-  function pollOrderStatus(orderId, { intervalMs = 2000, timeoutMs = 60000 } = {}){
+  function pollOrderStatus(orderId, { intervalMs = 2000, timeoutMs = 600000 } = {}){
     const startedAt = Date.now();
 
     return new Promise((resolve, reject) => {
