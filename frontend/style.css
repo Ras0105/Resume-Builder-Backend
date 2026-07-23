@@ -176,12 +176,30 @@
     font-family:Georgia,'Times New Roman',Times,serif;
     position:relative; /* anchors the watermark overlay below */
   }
+  /* ---------- Preview watermark ----------
+     Only ever shown on the free live preview, before payment. The paid PDF
+     is rendered server-side from a completely separate template
+     (backend/app/templates/resume_template.html) that has no knowledge of
+     this file, so this watermark can never end up in what the customer
+     actually downloads.
+     Implemented as a tiled inline-SVG background (not a JS-drawn canvas),
+     so it renders even with JavaScript disabled, and pointer-events:none
+     means it never blocks clicking/typing into the form fields underneath. */
+  .resume-paper::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='220'%3E%3Ctext x='0' y='120' font-family='Inter,sans-serif' font-weight='700' font-size='30' letter-spacing='2' fill='rgba(199,110,55,0.16)' transform='rotate(-32 210 110)'%3EPREVIEW · PAY TO DOWNLOAD%3C/text%3E%3C/svg%3E");
+    background-repeat:repeat;
+  }
   .empty-state{
     width:8.5in;max-width:100%;min-height:11in;background:#fff;color:#8a8f98;
     display:flex;align-items:center;justify-content:center;text-align:center;
     box-shadow:0 18px 38px rgba(0,0,0,0.45);padding:60px;
     font-family:'Inter',sans-serif;font-size:0.95rem;line-height:1.6;
   }
+
 
   /* Preview-only watermark deterrent — purely cosmetic friction, not a
      real security boundary. Add class="watermarked" on #resumePaper in
