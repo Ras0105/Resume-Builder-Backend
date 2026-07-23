@@ -6,7 +6,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     # ---- App ----
     ENV: str = "development"
+    # Comma-separated list of allowed CORS origins, e.g.
+    # "https://resume-builder-backend-ecru.vercel.app,http://localhost:5500"
     FRONTEND_URL: str = "http://localhost:5500"
+    # Base URL of THIS backend (Railway), used to build links to backend
+    # routes like /api/download/{token}. Deliberately separate from
+    # FRONTEND_URL — that one is for CORS and may hold multiple origins,
+    # which would corrupt a link if reused here.
+    BACKEND_URL: str = "http://localhost:8000"
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        # Origins must never have a trailing slash — browsers never send one
+        # in the Origin header, so a mismatch here silently breaks every
+        # CORS preflight (manifests as 400 on OPTIONS, request never reaches
+        # the route).
+        return [origin.strip().rstrip("/") for origin in self.FRONTEND_URL.split(",") if origin.strip()]
 
     # ---- Database ----
     DATABASE_URL: str

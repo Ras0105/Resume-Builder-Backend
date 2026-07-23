@@ -79,7 +79,7 @@ def generate_and_deliver_pdf(order_id: str) -> None:
         db.commit()
 
         # ---- 4. Email the link ----
-        download_url = build_download_link(settings.FRONTEND_URL, token)
+        download_url = build_download_link(settings.BACKEND_URL, token)
         expires_in_minutes = settings.DOWNLOAD_LINK_EXPIRY_MINUTES
 
         try:
