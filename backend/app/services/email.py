@@ -1,7 +1,6 @@
 # app/services/email.py
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 from app.config import get_settings
 
@@ -20,9 +19,14 @@ def send_resume_ready_email(
     expires_in_minutes: int,
 ) -> None:
     """
-    Sends the finished resume PDF link to the customer via Gmail SMTP.
-    Called only after payment is confirmed and the PDF has been generated
-    and uploaded — never call this speculatively or before generation succeeds.
+    Sends the finished resume PDF link to the customer via SendGrid's HTTPS
+    API. Called only after payment is confirmed and the PDF has been
+    generated and uploaded — never call this speculatively or before
+    generation succeeds.
+
+    Uses HTTPS (port 443) rather than SMTP deliberately — many hosts
+    (Railway included, on Free/Trial/Hobby plans) block outbound SMTP
+    ports (25/465/587) entirely, which an HTTPS API call never hits.
     """
     subject = "Your resume is ready to download"
 
@@ -54,16 +58,22 @@ def send_resume_ready_email(
         f"If it's expired, reply to this email and we'll send a fresh one."
     )
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = settings.EMAIL_FROM_ADDRESS
-    msg["To"] = to_email
-    msg.attach(MIMEText(text_body, "plain"))
-    msg.attach(MIMEText(html_body, "html"))
+    message = Mail(
+        from_email=settings.EMAIL_FROM_ADDRESS,  # must match your SendGrid Single Sender Verified address
+        to_emails=to_email,
+        subject=subject,
+        plain_text_content=text_body,
+        html_content=html_body,
+    )
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(settings.EMAIL_FROM_ADDRESS, settings.EMAIL_APP_PASSWORD)
-            server.send_message(msg)
+        client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        response = client.send(message)
+        if response.status_code >= 300:
+            raise EmailDeliveryError(
+                f"SendGrid rejected the email to {to_email} (status {response.status_code}): {response.body}"
+            )
+    except EmailDeliveryError:
+        raise
     except Exception as exc:
         raise EmailDeliveryError(f"Failed to send resume email to {to_email}") from exc

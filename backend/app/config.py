@@ -41,9 +41,9 @@ class Settings(BaseSettings):
     DOWNLOAD_LINK_SECRET: str
     DOWNLOAD_LINK_EXPIRY_MINUTES: int = 15
 
-    # ---- Email (Gmail SMTP) ----
-    EMAIL_FROM_ADDRESS: str      # your Gmail address — read from .env, never hardcoded
-    EMAIL_APP_PASSWORD: str      # Gmail app password — read from .env, never hardcoded
+    # ---- Email (SendGrid) ----
+    EMAIL_FROM_ADDRESS: str      # must be a SendGrid Single Sender Verified address
+    SENDGRID_API_KEY: str        # read from .env, never hardcoded
 
     model_config = SettingsConfigDict(
         env_file=".env",
