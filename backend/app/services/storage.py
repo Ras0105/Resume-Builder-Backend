@@ -73,7 +73,7 @@ def upload_pdf(order_id: str, pdf_bytes: bytes) -> str:
 #     except (BotoCoreError, ClientError) as exc:
 #         raise StorageError(f"Failed to generate download URL for {storage_key}: {exc}") from exc
 
-def get_presigned_download_url(storage_key: str, expires_in_seconds: int = 120) -> str:
+def get_presigned_download_url(storage_key: str, expires_in_seconds: int = 600) -> str:
     """
     Generates a short-lived presigned URL that forces browser download.
     """
