@@ -39,7 +39,7 @@ class Settings(BaseSettings):
 
     # ---- Signed download links ----
     DOWNLOAD_LINK_SECRET: str
-    DOWNLOAD_LINK_EXPIRY_MINUTES: int = 15
+    DOWNLOAD_LINK_EXPIRY_MINUTES: int = 1440
 
     # ---- Email (SendGrid) ----
     EMAIL_FROM_ADDRESS: str      # must be a SendGrid Single Sender Verified address
